@@ -40,7 +40,7 @@ class TTSEngine:
             wf.setframerate(sr)
             wf.writeframes(data.tobytes())
 
-    def synthesize(self, text: str, lang: str, out_wav: str):
+    def synthesize(self, text: str, lang: str, out_wav: str) -> float:
         cfg = TTS_CONFIG[lang]
         
         if lang == 'ru' and cfg.get('version') == 'v4':
@@ -89,6 +89,9 @@ class TTSEngine:
                         audio = audio[0]
                 sr_use = cfg['sample_rate']
 
+        # Рассчитываем длительность аудио в секундах
+        duration_seconds = audio.shape[0] / sr_use
+        
         self.save_wav_via_wave(audio, sr_use, out_wav)
         
         if sr_use != 48000:
@@ -97,3 +100,5 @@ class TTSEngine:
             base, ext = os.path.splitext(out_wav)
             out_48k = f"{base}_48k{ext}"
             self.save_wav_via_wave(audio_48k, 48000, out_48k)
+        
+        return duration_seconds
