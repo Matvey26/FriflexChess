@@ -1,0 +1,5 @@
+torch
+aksharamukha
+argostranslate
+torchaudio
+omegaconf
