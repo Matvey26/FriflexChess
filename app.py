@@ -52,7 +52,6 @@ def main():
         else:
             st.warning("Видео не было обработано.")
 
-
         if pgn_text:
             with st.expander("Содержимое PGN файла"):
                 st.text(pgn_text)
