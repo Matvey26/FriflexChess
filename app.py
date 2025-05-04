@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import json
 import io
+import tempfile
 from dotenv import load_dotenv
 from highlighter import find_highlight
 from llm_commentator import Commentator
@@ -52,7 +53,7 @@ def process_files(video_path, pgn_path, json_path, mode, lang):
     # Обрезаем видео
     output_dir = '/'.join(video_path.split('/')[:-1])
     # start_ts, end_ts - от начала видео в секундах - таймкод начала момента и таймкод конца момента
-    start_ts, end_ts = extract_segments_by_move(json_path, video_path, f'{output_dir}/{result.mp4}', [[start, end]])
+    start_ts, end_ts = extract_segments_by_move(json_path, video_path, f'{output_dir}/result.mp4', [[start, end]])
 
     # Переводим комментарии
     if lang != 'ru':
@@ -71,7 +72,7 @@ def process_files(video_path, pgn_path, json_path, mode, lang):
     # Вставляем аудио в видео
     tmp_video_path = os.path.join(output_dir, f'tmp.mp4')
     overlay_audio_on_video(
-        video_path=video_path,
+        video_path=f'{output_dir}/result.mp4',
         audio_path=audio_path,
         start_time_seconds=start_ts - durations['introduction'],
         output_path=tmp_video_path
@@ -121,6 +122,23 @@ def process_files(video_path, pgn_path, json_path, mode, lang):
     return tmp_video_path
 
 
+
+def save_uploaded_file(uploaded_file, suffix=""):
+    """Сохраняет загруженный файл во временный файл и возвращает его путь"""
+    if not uploaded_file:
+        return None
+        
+    # Создаем временный файл с правильным расширением
+    file_ext = uploaded_file.name.split('.')[-1]
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f'.{file_ext}')
+    
+    # Записываем содержимое загруженного файла во временный файл
+    temp_file.write(uploaded_file.getvalue())
+    temp_file.close()
+    
+    return temp_file.name
+
+
 def main():
     st.set_page_config(page_title="Файловый загрузчик и плеер", layout="wide")
     st.title("Загрузка файлов и воспроизведение видео")
@@ -139,6 +157,11 @@ def main():
             st.error("Пожалуйста, загрузите видео файл.")
             return
 
+        # Сохраняем загруженные файлы во временные файлы
+        video_path = save_uploaded_file(video_file)
+        pgn_path = save_uploaded_file(pgn_file)
+        json_path = save_uploaded_file(json_file)
+
         # video_bytes = video_file.read()
         # pgn_text = pgn_file.read().decode('utf-8') if pgn_file else None
         # try:
@@ -148,12 +171,20 @@ def main():
         #     return
 
         with st.spinner("Обработка файлов..."):
-            processed_video = process_files(video_file, pgn_file, json_file, mode, lang)
+            processed_video = process_files(video_path, pgn_path, json_path, mode, lang)
 
         if processed_video:
             st.success("Обработка завершена! Воспроизведение видео ниже.")
             st.markdown("### Просмотр видео")
             st.video(processed_video, format="video/mp4", start_time=0)
+
+            # Удаляем временные файлы после использования (по желанию)
+            for path in [video_path, pgn_path, json_path, processed_video]:
+                if path and os.path.exists(path):
+                    try:
+                        os.unlink(path)
+                    except:
+                        pass
         else:
             st.warning("Видео не было обработано.")
 

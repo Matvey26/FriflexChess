@@ -1,4 +1,4 @@
-from moviepy import VideoFileClip, concatenate_videoclips
+from moviepy.editor import VideoFileClip, concatenate_videoclips
 from moviepy.video.VideoClip import ColorClip
 import json
 
@@ -12,8 +12,8 @@ def extract_segments_by_move(ts_path: str, in_video: str, out_video: str, moves_
     result = ColorClip(size=clip.size, color=(0, 0, 0), duration=0.1)
 
     for fr, to in moves_range:
-        smove = max(0, fr * 2 - 1)
-        emove = max(smove, min(to * 2, len(data)))
+        smove = int(max(0, fr * 2 - 1))
+        emove = int(max(smove, min(to * 2, len(data))))
 
         for move in range(smove, emove):
             stime = (data[move]["start_ts"] - data[0]["start_ts"]) / 1000
