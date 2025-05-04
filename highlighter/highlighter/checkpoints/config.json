@@ -1,0 +1,7 @@
+{
+    "HIDDEN_DIM": 256,
+    "OUTPUT_DIM": 100,
+    "LEARNING_RATE": 0.0006,
+    "NEGATIVES_COUNT": 5,
+    "NUM_EPOCHS": 1
+}
