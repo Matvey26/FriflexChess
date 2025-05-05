@@ -44,18 +44,30 @@ def process_files(video_path, pgn_path, json_path, mode, lang):
     """
 
     # Ищем интересный момент
+    print('Ищем интересный момент')
     interesting_moment = find_highlight(pgn_path)
     start, end = interesting_moment['start'], interesting_moment['end']
+    print(f'найденный момент: {start}, {end}')
 
     # Генерируем комментарии
-    comments = commentator.make_comments(pgn_path, start, end, 'vivid')
-
+    print('Генерируем комментарии')
+    while True:
+        try:
+            comments = commentator.make_comments(pgn_path, start, end, 'vivid')
+        except Exception as e:
+            print('Произошла ошибка {e}. Повторяем')
+            continue
+    
+        break
+        
     # Обрезаем видео
+    print('Обрезаем видео')
     output_dir = '/'.join(video_path.split('/')[:-1])
     # start_ts, end_ts - от начала видео в секундах - таймкод начала момента и таймкод конца момента
-    start_ts, end_ts = extract_segments_by_move(json_path, video_path, f'{output_dir}/result.mp4', [[start, end]])
+    start_ts, end_ts = extract_segments_by_move(json_path, video_path, f'{output_dir}/result.mp4', start, end)
 
     # Переводим комментарии
+    print('Переводи комментарии')
     if lang != 'ru':
         comments = {
             key: smart_translate(text, "ru", lang)
@@ -63,6 +75,7 @@ def process_files(video_path, pgn_path, json_path, mode, lang):
         }
 
     # Озвучиваем
+    print('Делаем озвучку')
     durations = {}
     for key, text in comments.item():
         out_path = os.path.join(output_dir, f'{key}.wav')

@@ -3,7 +3,7 @@ import textwrap
 from typing import Tuple, List
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+from moviepy import VideoFileClip, ImageClip, CompositeVideoClip
 
 def create_text_frame(text, size, font_size=30, font_color="white", bg_color=None):
     """Create a frame with text using PIL instead of TextClip"""

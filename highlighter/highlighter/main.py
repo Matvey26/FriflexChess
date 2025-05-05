@@ -159,5 +159,8 @@ def find_highlight(pgn_path):
 
     start, end = find_longest_segment_of_ones(y_result)
 
-    print(start, end)
-    return start / 2 + 1, end / 2 + 1
+    # print(start, end)
+    return {
+        'start': float(start / 2 + 1),
+        'end': float(end / 2 + 1)
+    }
