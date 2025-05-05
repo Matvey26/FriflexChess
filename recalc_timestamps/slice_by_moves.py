@@ -16,8 +16,7 @@ def extract_segments_by_move(ts_path: str, in_video: str, out_video: str, moves_
         emove = max(smove, min(to*2, len(data)))
 
         for move in range(smove, emove):
-            stime = (data[move]["start_ts"] - data[0]["start_ts"]) / 1000
-            etime = (data[move]["start_ts"] - data[0]["start_ts"] + data[move]["fragment_before_ts"]) / 1000
+            stime, etime = get_timecode(ts_path, move)
 
             start = max(0.0, min(float(stime), total))
             end   = max(stime, min(float(etime), total))
@@ -36,5 +35,18 @@ def extract_segments_by_move(ts_path: str, in_video: str, out_video: str, moves_
     )
     result.close()
     clip.close()
-        
-        
+
+    return get_timecode(ts_path, moves_range[0][0])[0], \
+        get_timecode(ts_path, moves_range[-1][-1])[1]
+
+
+
+def get_timecode(ts_path: str, move):
+    with open(ts_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+
+    result, _move = 0, min(len(data), move) 
+    for id in range(_move):
+        result += data[id]["end_ts"] - data[id]["start_ts"]
+
+    return result / 1000, (result + data[_move]["fragment_before_ts"]) / 1000
