@@ -49,4 +49,4 @@ def get_timecode(ts_path: str, move):
     for id in range(_move):
         result += data[id]["end_ts"] - data[id]["start_ts"]
 
-    return result / 1000, (result + data[_move]["fragment_before_ts"]) / 1000``
+    return result / 1000, (result + data[_move]["fragment_before_ts"]) / 1000
